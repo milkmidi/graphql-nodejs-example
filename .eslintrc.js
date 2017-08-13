@@ -4,11 +4,6 @@ module.exports = {
   settings: {    
   },
   rules: {
-   /*  'no-param-reassign': ['error', {
-      props: false
-    }],
-    'no-plusplus': ['error', {
-      allowForLoopAfterthoughts: true
-    }], */
+    'no-console':0,   
   },
 };
