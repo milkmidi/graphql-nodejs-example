@@ -1,66 +1,48 @@
-const {
-  GraphQLString,
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLSchema,
-  GraphQLObjectType,
-} = require('graphql');
-const mockData = require('./mockData');
 
-const UserType = new GraphQLObjectType({
-  name: 'User',
-  fields: {
-    id: { type: GraphQLString },
-    name: { type: GraphQLString },
-  },
-});
+const typeDefs = `
+  scalar JSON
+  scalar Date
 
-const query = new GraphQLObjectType({
-  name: 'RootQuery',
-  fields: {
-    hello: {
-      type: GraphQLString,
-      resolve() {
-        return 'world';
-      },
-    },
-    user: {
-      type: UserType,
-      args: {
-        id: { type: GraphQLString },
-      },
-      resolve(parentValue, { id }) {
-        // console.log(req.session);
-        console.log(parentValue, id);
-        return mockData[id];
-      },
-    },
-    users: {
-      type: new GraphQLList(UserType),
-      resolve(parentValue) {
-        return mockData.users;
-      },
-    },
-  },
-});
+  type Foo {
+    aField: JSON
+  }
+  type MyType {
+    created: Date
+  }
 
-const mutation = new GraphQLObjectType({
-  name: 'Mutation',
-  fields: {
-    addUser: {
-      type: UserType,
-      descriptions: 'add Project',
-      args: {
-        name: { type: new GraphQLNonNull(GraphQLString) },
-      },
-      resolve(parentValue, { name }) {
-        // console.log(req.session);
-        console.log(parentValue, name);
-        return mockData.a;
-      },
+  type Author {
+    id: Int!
+    firstName: String
+    lastName: String
+    posts: [Post] # the list of Posts by this author
+  }
 
-    },
-  },
-});
+  type Post {
+    id: Int!
+    title: String
+    author: Author
+    text: String
+    votes: Int
+  }
 
-module.exports = new GraphQLSchema({ query, mutation });
+  # the schema allows the following query:
+  type Query {
+    posts: [Post]
+    author(id: Int!): Author
+    foo: Foo
+    date: MyType
+  }
+
+  # this schema allows the following mutation:
+  type Mutation {
+    upvotePost (
+      postId: Int!
+    ): Post
+  }
+
+  # default query Name: Query
+  schema {
+    query: Query
+  }
+`;
+module.exports = typeDefs;

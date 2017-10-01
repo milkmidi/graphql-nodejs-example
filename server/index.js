@@ -1,39 +1,37 @@
 const express = require('express');
-const graphqlHTTP = require('express-graphql');
 const session = require('express-session');
-
-const schema = require('./graphQL/schema');
-
+const { graphiqlExpress, graphqlExpress } = require('graphql-server-express');
+const bodyParser = require('body-parser');
+const { makeExecutableSchema, addMockFunctionsToSchema } = require('graphql-tools');
+const typeDefs = require('./graphQL/schema');
+const resolvers = require('./graphQL/resolvers');
+const mocks = require('./graphQL/mocks');
 
 function loggingMiddleware(req, res, next) {
-  res.locals.user = { name: 'milkmidi' };
+  req.user = { name: 'milkmidi' };
   next();
 }
+const logger = { log: e => console.log(`aaaaaaaaaaaaaaa:${e}`) };
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers,
+  logger,
+});
+addMockFunctionsToSchema({ schema, mocks });
 
 const app = express();
-app.use(session({ secret: 'hi, I\'m milkmidi', cookie: { maxAge: 60000 } }));
-
-const someFunctionToGetRootValue = (req, res, graphQLParams) =>
-  new Promise((resolve) => {
-    // console.log(graphQLParams);
-    setTimeout(() => {
-      resolve(res.locals.user);
-    }, 300);
-  })
-;
-
-app.use('/graphql', loggingMiddleware, graphqlHTTP(async (req, res, graphQLParams) => {
-  const startTime = Date.now();
-  return {
-    schema,
-    rootValue: await someFunctionToGetRootValue(req, res, graphQLParams),
-    graphiql: true,
-    pretty: true,
-    extensions({ document, variables, operationName, result }) { // eslint-disable-line
-      return { runTime: Date.now() - startTime };
-    },
-  };
+// app.use(session({ secret: 'hi, I\'m milkmidi', cookie: { maxAge: 60000 } }));
+app.use(bodyParser.json());
+app.use('/graphiql', graphiqlExpress({
+  endpointURL: '/graphql',
 }));
+
+app.use('/graphql', loggingMiddleware, graphqlExpress(req => ({
+  schema,
+  context: {
+    user: req.user,
+  },
+})));
 
 app.listen(4000);
 console.log('Running a GraphQL API server at localhost:4000/graphql');
