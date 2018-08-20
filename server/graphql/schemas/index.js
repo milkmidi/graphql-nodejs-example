@@ -43,6 +43,7 @@ const typeDefs = `
   # default query Name: Query
   schema {
     query: Query
+    mutation: Mutation
   }
 `;
 module.exports = typeDefs;

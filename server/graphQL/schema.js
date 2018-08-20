@@ -10,5 +10,5 @@ const schema = makeExecutableSchema({
   logger,
 });
 
-addMockFunctionsToSchema({ schema, mocks });
+// addMockFunctionsToSchema({ schema, mocks });
 module.exports = schema;

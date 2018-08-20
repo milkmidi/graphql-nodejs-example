@@ -2,7 +2,7 @@
   "name": "graphql_test",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server/index.js",
   "scripts": {
     "start": "nodemon server"
   },
@@ -10,19 +10,20 @@
   "license": "ISC",
   "dependencies": {
     "babel-eslint": "^8.2.6",
-    "body-parser": "^1.18.2",
-    "casual": "^1.5.17",
-    "eslint": "^4.4.1",
-    "eslint-config-airbnb-base": "^11.3.1",
-    "eslint-plugin-import": "^2.7.0",
-    "express": "^4.15.4",
+    "body-parser": "^1.18.2",    
+    "express": "^4.16.3",
     "express-graphql": "^0.6.12",
-    "express-session": "^1.15.5",
-    "graphql": "^0.10.5",
-    "graphql-server-express": "^1.1.2",
-    "graphql-tools": "^1.2.3",
-    "graphql-type-json": "^0.1.4",
-    "lodash": "^4.17.4",
-    "nodemon": "^1.11.0"
+    "express-session": "^1.15.6",
+    "graphql": "^0.13.2",
+    "graphql-tools": "^3.1.1",
+    "graphql-type-json": "^0.2.1",
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "casual": "^1.5.19",
+    "eslint": "^5.4.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "nodemon": "^1.18.3"
   }
 }

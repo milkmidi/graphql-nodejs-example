@@ -4,8 +4,9 @@ module.exports = {
   settings: {
   },
   rules: {
-    'import/no-unresolved': 0 ,
+    'object-curly-newline': 0,
+    'import/no-unresolved': 0,
     'import/no-extraneous-dependencies': 0,
-    'no-console':0,
+    'no-console': 0,
   },
 };

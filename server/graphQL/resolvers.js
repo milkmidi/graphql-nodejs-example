@@ -34,7 +34,11 @@ const posts = [
 ];
 const resolvers = {
   Query: {
-    posts() {
+    posts(parent, args, context, info) {
+      console.log(parent);
+      console.log(args);
+      console.log(context);
+      // console.log(info);
       // throw new Error('testError');
       return posts;
     },
@@ -58,7 +62,22 @@ const resolvers = {
     },
   },
   Author: {
-    posts: author => filter(posts, { authorId: author.id }),
+    /**
+     * @example
+     * query{
+        author(id: 1) {
+          firstName
+          posts {
+            title
+            votes
+          }
+        }
+      }
+     */
+    posts(parent) {
+      console.log(parent);
+      return filter(posts, { authorId: parent.id });
+    },
   },
   Post: {
     author: post => find(authors, { id: post.authorId }),
