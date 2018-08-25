@@ -1,0 +1,19 @@
+{
+  "presets": [
+    ["env",{
+      "targets":{
+        "node":"current"
+      }
+    }],
+    "flow"
+  ],
+  "comments": false,
+  "plugins": [
+    ["module-resolver", {
+      "root": ["../"],
+      "alias": {
+        "@": "./server"
+      }
+    }]
+  ]
+}

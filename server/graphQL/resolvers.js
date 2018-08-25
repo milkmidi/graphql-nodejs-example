@@ -1,6 +1,21 @@
 const { find, filter } = require('lodash');
 const GraphQLJSON = require('graphql-type-json');
-const { GraphQLScalarType, Kind } = require('graphql');
+const { GraphQLScalarType, Kind, GraphQLEnumType } = require('graphql');
+
+const PostEnumType = new GraphQLEnumType({
+  name: 'PostEnum',
+  values: {
+    REMOVE: {
+      value: 0,
+    },
+    READY: {
+      value: 1,
+    },
+    DRAFT: {
+      value: 2,
+    },
+  },
+});
 
 const DateScalarType = new GraphQLScalarType({
   name: 'Date',
@@ -20,39 +35,53 @@ const DateScalarType = new GraphQLScalarType({
   },
 });
 
+type PostInput = {
+  authorId: Number,
+  title: String
+}
+
 const authors = [
-  { id: 1, firstName: 'Tom', lastName: 'Coleman' },
-  { id: 2, firstName: 'Sashko', lastName: 'Stubailo' },
-  { id: 3, firstName: 'Mikhail', lastName: 'Novikov' },
+  { id: 1, name: 'milkmidi' },
+  { id: 2, name: '奶綠茶' },
+  { id: 3, name: 'PiPi' },
 ];
 
 const posts = [
-  { id: 1, authorId: 1, title: 'Introduction to GraphQL', votes: 2 },
-  { id: 2, authorId: 2, title: 'Welcome to Apollo', votes: 3 },
-  { id: 3, authorId: 2, title: 'Advanced GraphQL', votes: 1 },
-  { id: 4, authorId: 3, title: 'Launchpad is Cool', votes: 7 },
+  { id: 1, authorId: 1, title: 'Introduction to GraphQL', votes: 2, status: 0 },
+  { id: 2, authorId: 2, title: 'Welcome to Apollo', votes: 3, status: 2 },
+  { id: 3, authorId: 2, title: 'Advanced GraphQL', votes: 1, status: 1 },
+  { id: 4, authorId: 3, title: 'Launchpad is Cool', votes: 7, status: 1 },
 ];
 const resolvers = {
   Query: {
+    hello(parent, args, context, info) {
+      // console.log(info.fieldName);
+      return 'world';
+    },
     posts(parent, args, context, info) {
-      console.log(parent);
-      console.log(args);
-      console.log(context);
-      // console.log(info);
-      // throw new Error('testError');
       return posts;
     },
-    author: (_, { id }) => find(authors, { id }),
+    authors() {
+      return authors;
+    },
+    author: (parent, { id }) => find(authors, { id }),
     foo() {
-      const aField = { obj: 123456 };
-      return { name: 'milkmidi', aField };
+      const aField = { obj: 123456, hi: 'milkmidi' };
+      return { aField };
     },
     date() {
       return { created: new Date() };
     },
   },
   Mutation: {
-    upvotePost: (_, { postId }) => {
+    /*
+    mutation{
+      upvotePost(postId:2) {
+        id
+      }
+    }
+     */
+    upvotePost(_, { postId }) {
       const post = find(posts, { id: postId });
       if (!post) {
         throw new Error(`Couldn't find post with id ${postId}`);
@@ -60,29 +89,48 @@ const resolvers = {
       post.votes += 1;
       return post;
     },
+    /*
+    1 basic
+    mutation {
+      createPost(input:{
+        title:"test",
+        authorId:2
+      }){
+        title
+      }
+    }
+    2 with variables
+    mutation createPost($input: PostInput) {
+      createPost(input: $input) {
+        title
+      }
+    }
+     */
+    createPost(parent, args) {
+      const input:PostInput = args.input;
+      console.log(input);
+      return posts[posts.length - 1];
+    },
   },
   Author: {
-    /**
-     * @example
-     * query{
-        author(id: 1) {
-          firstName
-          posts {
-            title
-            votes
-          }
-        }
-      }
-     */
     posts(parent) {
-      console.log(parent);
+      console.log('Author posts', parent);
       return filter(posts, { authorId: parent.id });
     },
   },
   Post: {
-    author: post => find(authors, { id: post.authorId }),
+    author(parent) {
+      console.log('Post author', parent);
+      return find(authors, { id: parent.authorId });
+    },
   },
   JSON: GraphQLJSON,
   Date: DateScalarType,
+  // PostEnum: PostEnumType,
+  PostEnum: {
+    REMOVE: 0,
+    READY: 1,
+    DRAFT: 2,
+  },
 };
 module.exports = resolvers;
