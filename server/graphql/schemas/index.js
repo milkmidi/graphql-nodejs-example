@@ -1,5 +1,41 @@
 
-const typeDefs = `
+export const User = `
+  type User {
+    name     : String!
+    email    : String!
+    password : String!
+  }
+`;
+export const Author = `
+  type Author {
+    id: Int!
+    name: String
+    posts: [Post] # the list of Posts by this author
+  }
+`;
+
+export const Post = `
+  type Post {
+    "就是id"
+    id: Int!
+    "標題"
+    title: String
+    "作者"
+    author: Author
+    "按讚數"
+    votes: Int
+    "狀態"
+    status: PostEnum
+  }
+`;
+
+export const Token = `
+  type Token {
+    token: String!
+  }
+`;
+
+export const typeDefs = `
   scalar JSON
   scalar Date
   # scalar PostEnum
@@ -8,55 +44,59 @@ const typeDefs = `
     aField: JSON
   }
   type MyType {
+    label: String
     created: Date
   }
-
-  type Author {
-    id: Int!
-    name: String
-    posts: [Post] # the list of Posts by this author
-  }
-
   enum PostEnum{
+    "準備"
     READY
+    "草稿"
     DRAFT
+    "移掉"
     REMOVE
   }
-
-  type Post {
-    id: Int!
-    title: String
-    author: Author
-    votes: Int
-    status: PostEnum
-  }
-
-  # the schema allows the following query:
-  type Query {
-    # you say hello, I say world.
-    hello: String
-    posts: [Post]
-    authors: [Author]
-    author(id: Int!): Author
-    foo: Foo
-    date: MyType
-  }
-
+  "我是PostInput"
   input PostInput {
+    "作者id"
     authorId: Int!
+    "標題"
     title: String!
   }
 
-  # this schema allows the following mutation:
-  type Mutation {
-    upvotePost (postId: Int! ): Post
-    createPost(input: PostInput): Post
-  }
+  
+`;
 
-  # default query Name: Query
-  schema {
-    query: Query
-    mutation: Mutation
+
+export const Query = `
+  # the schema allows the following query:
+  type Query {
+    "you say hello, I say world."
+    hello: String
+    posts(filter:JSON): [Post]
+    "取得所有 authors"
+    authors: [Author]
+    "取得指定 author (id 必填)"
+    author(id: Int!): Author
+    foo: Foo
+    myType: MyType
+
+    "就是一堆 User"
+    users: [User]
   }
 `;
-module.exports = typeDefs;
+
+export const Mutation = `
+  # this schema allows the following mutation:
+  type Mutation {
+    "按讚呀"
+    upvotePost (postId: Int! ): Post
+    "新增一筆Post"
+    createPost(input: PostInput): Post
+
+    "注"
+    signUp(name: String!, email: String!, password: String!): User
+
+    "登"
+    login(email: String!, password: String!): Token
+  }
+`;

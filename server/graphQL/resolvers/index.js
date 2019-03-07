@@ -1,21 +1,11 @@
+import { authors, posts, users } from '../mockData';
+
 const { find, filter } = require('lodash');
 const GraphQLJSON = require('graphql-type-json');
-const { GraphQLScalarType, Kind, GraphQLEnumType } = require('graphql');
+const { GraphQLScalarType, Kind } = require('graphql');
+const jwt = require('jsonwebtoken');
 
-const PostEnumType = new GraphQLEnumType({
-  name: 'PostEnum',
-  values: {
-    REMOVE: {
-      value: 0,
-    },
-    READY: {
-      value: 1,
-    },
-    DRAFT: {
-      value: 2,
-    },
-  },
-});
+const SECRET = 'just_a_random_secret';
 
 const DateScalarType = new GraphQLScalarType({
   name: 'Date',
@@ -35,43 +25,30 @@ const DateScalarType = new GraphQLScalarType({
   },
 });
 
-type PostInput = {
-  authorId: Number,
-  title: String
-}
+const createToken = ({ email, name }) => jwt.sign({ email, name }, SECRET, {
+  expiresIn: '1d',
+});
 
-const authors = [
-  { id: 1, name: 'milkmidi' },
-  { id: 2, name: '奶綠茶' },
-  { id: 3, name: 'PiPi' },
-];
-
-const posts = [
-  { id: 1, authorId: 1, title: 'Introduction to GraphQL', votes: 2, status: 0 },
-  { id: 2, authorId: 2, title: 'Welcome to Apollo', votes: 3, status: 2 },
-  { id: 3, authorId: 2, title: 'Advanced GraphQL', votes: 1, status: 1 },
-  { id: 4, authorId: 3, title: 'Launchpad is Cool', votes: 7, status: 1 },
-];
 const resolvers = {
   Query: {
-    hello(parent, args, context, info) {
-      // console.log(info.fieldName);
+    hello(parent, args, context) {
+      console.log('parent', parent);
+      console.log('args', args);
+      console.log('context', context);
       return 'world';
     },
-    posts(parent, args, context, info) {
+    posts: (root, args) => {
+      console.log(args);
       return posts;
     },
-    authors() {
-      return authors;
-    },
+    users: () => users,
+    authors: () => authors,
     author: (parent, { id }) => find(authors, { id }),
     foo() {
       const aField = { obj: 123456, hi: 'milkmidi' };
       return { aField };
     },
-    date() {
-      return { created: new Date() };
-    },
+    myType: () => ({ created: new Date() }),
   },
   Mutation: {
     /*
@@ -107,9 +84,34 @@ const resolvers = {
     }
      */
     createPost(parent, args) {
-      const input:PostInput = args.input;
+      const { input } = args;
       console.log(input);
+      const newPost = {
+        id: +new Date(),
+        title: input.title,
+        authorId: input.authorId,
+        votes: 2,
+        status: 0,
+      };
+      posts.push(newPost);
       return posts[posts.length - 1];
+    },
+    signUp(parent, { name, email, password }) {
+      const isUserEmailDuplicate = users.some(user => user.email === email);
+      if (isUserEmailDuplicate) throw new Error('User Email Duplicate');
+
+      const newData = {
+        name,
+        email,
+        password,
+      };
+      users.push(newData);
+      return newData;
+    },
+    login(parent, { email }) {
+      const user = users.find(u => u.email === email);
+
+      return { token: createToken(user) };
     },
   },
   Author: {
